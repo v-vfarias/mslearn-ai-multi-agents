@@ -68,6 +68,7 @@ git clone https://github.com/MicrosoftLearning/mslearn-ai-multi-agents.git
 ```powershell
 cd Allfiles\07-northwind-health-advanced-rag
 az version
+winget install microsoft.azd
 azd version
 python --version
 az account show --output table

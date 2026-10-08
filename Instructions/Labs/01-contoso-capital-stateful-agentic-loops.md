@@ -38,7 +38,7 @@ You need:
 - [Azure Developer CLI](https://learn.microsoft.com/azure/developer/azure-developer-cli/install-azd)
 - [Visual Studio Code](https://code.visualstudio.com/download)
 - An Azure subscription with model quota in a supported region
-- Contributor and User Access Administrator on the target resource group, or equivalent preassigned Foundry data-plane access
+- Contributor and Role Based Access Control Administrator (or User Access Administrator) on the target resource group, or equivalent preassigned Foundry data-plane access
 
 **Clone and open the repository**
 
@@ -50,9 +50,19 @@ git clone https://github.com/MicrosoftLearning/mslearn-ai-multi-agents.git
 
 2. Open the cloned repository in Visual Studio Code.
 
+**Install Azure Developer CLI**
+
+3. In PowerShell, install Azure Developer CLI:
+
+```powershell
+winget install microsoft.azd
+```
+
+If `azd` is still not available after installation, close and reopen the PowerShell terminal so that it reloads `PATH`.
+
 **Verify tools and authentication**
 
-3. Open a PowerShell terminal in Visual Studio Code and run:
+4. Open a PowerShell terminal in Visual Studio Code and run:
 
 ```powershell
 cd Allfiles\01-contoso-capital-stateful-agentic-loops
@@ -62,8 +72,8 @@ python --version
 az account show --output table
 ```
 
-4. Confirm that each command succeeds and that `az account show` displays the subscription you intend to use.
-5. If needed, authenticate with `az login` and `azd auth login`, and then repeat the checks.
+5. Confirm that each command succeeds and that `az account show` displays the subscription you intend to use.
+6. If needed, authenticate with `az login` and `azd auth login`, and then repeat the checks.
 
 **Architecture checkpoint**
 
@@ -126,9 +136,25 @@ Remove-Item Env:AZURE_DEV_USER_AGENT
 
 3. If provisioning fails, inspect the first deployment error. For model or region availability errors, update the relevant environment value and rerun `azd provision`.
 
+4. Grant the signed-in user permission to create and use agents in the provisioned Foundry account:
+
+```powershell
+az role assignment create --assignee (az ad signed-in-user show --query id -o tsv) --role "Foundry User" --resource-group $resourceGroupName
+```
+
+The **Foundry User** role includes the agent read, write, and delete actions required by this lab. The signed-in identity must be allowed to create role assignments. In a managed lab environment, an administrator can run this command for the learner.
+
+5. Verify the role assignment:
+
+```powershell
+az role assignment list --assignee (az ad signed-in-user show --query id -o tsv) --resource-group $resourceGroupName --output table
+```
+
+If the assignment was just created, refresh the Azure CLI token with `az logout` and `az login` before running the application.
+
 **Verify the generated environment**
 
-4. Open `.env` and confirm that it contains:
+6. Open `.env` and confirm that it contains:
 
 - `FOUNDRY_PROJECT_ENDPOINT`
 - `FOUNDRY_MODEL_NAME`
@@ -140,7 +166,7 @@ The Application Insights connection string is stored in the Foundry project conn
 
 > **Network access for this lab:** The Bicep template enables the Foundry account's native public network access and sets the default network action to **Allow** so the local application can reach the project endpoint. Microsoft Entra authentication and Azure RBAC are still required. After deployment, confirm these settings on the Foundry account **Networking** page. Production environments should use an approved selected-network or private-endpoint design.
 
-5. Do not add tokens or keys to `.env`.
+7. Do not add tokens or keys to `.env`.
 
 ## Task 4: Implement the solution
 

@@ -52,6 +52,7 @@ git clone https://github.com/MicrosoftLearning/mslearn-ai-multi-agents.git
 ```powershell
 cd Allfiles\06-northwind-health-mcp-tools
 az version
+winget install microsoft.azd
 azd version
 python --version
 docker --version

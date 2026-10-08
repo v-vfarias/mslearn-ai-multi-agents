@@ -54,6 +54,7 @@ git clone https://github.com/MicrosoftLearning/mslearn-ai-multi-agents.git
 ```powershell
 cd Allfiles\11-fabrikam-responsible-ai-governance
 az version
+winget install microsoft.azd
 azd version
 python --version
 az account show --output table

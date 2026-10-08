@@ -74,6 +74,7 @@ git clone https://github.com/MicrosoftLearning/mslearn-ai-multi-agents.git
 ```powershell
 cd Allfiles\10-fabrikam-zero-trust-security
 az version
+winget install microsoft.azd
 azd version
 python --version
 ```
@@ -253,6 +254,7 @@ azd env set FOUNDRY_MODEL_CATALOG_NAME gpt-5.4-mini
 azd env set FOUNDRY_MODEL_VERSION 2026-03-17
 az bicep build --file infra/main.bicep
 azd provision
+az role assignment create --assignee $principalId --role "Foundry User" --resource-group $resourceGroupName
 azd env get-values | Out-File .env -Encoding utf8
 Remove-Item Env:AZURE_DEV_USER_AGENT
 python scripts/preflight.py

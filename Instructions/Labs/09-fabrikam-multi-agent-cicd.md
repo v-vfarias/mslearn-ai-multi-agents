@@ -101,6 +101,7 @@ cd mslearn-ai-multi-agents\Allfiles\09-fabrikam-multi-agent-cicd
 2. Sign in and confirm the subscription:
 
 ```powershell
+winget install microsoft.azd
 az login
 az account show --output table
 $env:AZURE_DEV_USER_AGENT = 'microsoft_foundry_skill'; azd auth login

@@ -48,6 +48,7 @@ git clone https://github.com/MicrosoftLearning/mslearn-ai-multi-agents.git
 ```powershell
 cd Allfiles\14-adventure-works-evaluation-frameworks
 az version
+winget install microsoft.azd
 azd version
 python --version
 az account show --output table

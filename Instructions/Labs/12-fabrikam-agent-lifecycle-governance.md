@@ -48,6 +48,7 @@ git clone https://github.com/MicrosoftLearning/mslearn-ai-multi-agents.git
 ```powershell
 cd Allfiles\12-fabrikam-agent-lifecycle-governance
 az version
+winget install microsoft.azd
 azd version
 python --version
 az account show --output table
@@ -108,6 +109,7 @@ azd env set FOUNDRY_MODEL_NAME $modelDeploymentName
 azd env set FOUNDRY_MODEL_CATALOG_NAME $modelName
 azd env set FOUNDRY_MODEL_VERSION $modelVersion
 azd provision
+az role assignment create --assignee (az ad signed-in-user show --query id -o tsv) --role "Foundry User" --resource-group $resourceGroupName
 azd env get-values | Out-File .env -Encoding utf8
 Remove-Item Env:AZURE_DEV_USER_AGENT
 ```

@@ -53,6 +53,7 @@ git clone https://github.com/MicrosoftLearning/mslearn-ai-multi-agents.git
 ```powershell
 cd Allfiles\08-northwind-health-multi-agent-memory
 az version
+winget install microsoft.azd
 azd version
 python --version
 az account show --output table
@@ -128,6 +129,7 @@ azd env new lab08-memory-dev
 azd env set AZURE_LOCATION $azureRegion
 azd env set AZURE_RESOURCE_GROUP $resourceGroupName
 azd provision
+az role assignment create --assignee (az ad signed-in-user show --query id -o tsv) --role "Foundry User" --resource-group $resourceGroupName
 azd env get-values | Out-File .env -Encoding utf8
 ```
 

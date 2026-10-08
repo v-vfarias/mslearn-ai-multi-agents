@@ -50,6 +50,7 @@ git clone https://github.com/MicrosoftLearning/mslearn-ai-multi-agents.git
 ```powershell
 cd Allfiles\03-contoso-capital-task-decomposition
 az version
+winget install microsoft.azd
 azd version
 python --version
 az account show --output table
@@ -107,6 +108,7 @@ azd env set FOUNDRY_MODEL_NAME gpt-5.4-mini
 azd env set FOUNDRY_MODEL_CATALOG_NAME gpt-5.4-mini
 azd env set FOUNDRY_MODEL_VERSION 2026-03-17
 azd provision
+az role assignment create --assignee (az ad signed-in-user show --query id -o tsv) --role "Foundry User" --resource-group $resourceGroupName
 azd env get-values | Out-File .env -Encoding utf8
 Remove-Item Env:AZURE_DEV_USER_AGENT
 ```
