@@ -239,11 +239,12 @@ Expected output: preflight ends with `READY (local)`, followed by `TASK_1_VALIDA
 $azureRegion = 'eastus2'
 $resourceGroupName = ''
 az login
+$principalId = az ad signed-in-user show --query id --output tsv
 if ([string]::IsNullOrWhiteSpace($resourceGroupName)) {
   $resourceGroupName = "rg-lab10-$((New-Guid).Guid.Substring(0, 8))"
   az group create --name $resourceGroupName --location $azureRegion | Out-Null
 }
-$principalId = az ad signed-in-user show --query id --output tsv
+az role assignment create --assignee $principalId --role "Foundry User" --resource-group $resourceGroupName
 $env:AZURE_DEV_USER_AGENT = 'microsoft_foundry_skill'
 azd env new lab10-zero-trust
 azd env set AZURE_LOCATION $azureRegion
@@ -254,7 +255,6 @@ azd env set FOUNDRY_MODEL_CATALOG_NAME gpt-5.4-mini
 azd env set FOUNDRY_MODEL_VERSION 2026-03-17
 az bicep build --file infra/main.bicep
 azd provision
-az role assignment create --assignee $principalId --role "Foundry User" --resource-group $resourceGroupName
 azd env get-values | Out-File .env -Encoding utf8
 Remove-Item Env:AZURE_DEV_USER_AGENT
 python scripts/preflight.py

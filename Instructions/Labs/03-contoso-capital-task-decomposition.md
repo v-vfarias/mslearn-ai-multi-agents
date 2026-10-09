@@ -95,10 +95,12 @@ Check model quota and access before provisioning. Planning, specialist execution
 ```powershell
 $azureRegion = 'eastus2'
 $resourceGroupName = ''
+$principalId = az ad signed-in-user show --query id -o tsv
 if ([string]::IsNullOrWhiteSpace($resourceGroupName)) {
   $resourceGroupName = "rg-lab03-$((New-Guid).Guid.Substring(0, 8))"
   az group create --name $resourceGroupName --location $azureRegion | Out-Null
 }
+az role assignment create --assignee $principalId --role "Foundry User" --resource-group $resourceGroupName
 az bicep build --file infra/main.bicep
 $env:AZURE_DEV_USER_AGENT='microsoft_foundry_skill'
 azd env new lab03
@@ -108,8 +110,7 @@ azd env set FOUNDRY_MODEL_NAME gpt-5.4-mini
 azd env set FOUNDRY_MODEL_CATALOG_NAME gpt-5.4-mini
 azd env set FOUNDRY_MODEL_VERSION 2026-03-17
 azd provision
-az role assignment create --assignee (az ad signed-in-user show --query id -o tsv) --role "Foundry User" --resource-group $resourceGroupName
-azd env get-values | Out-File .env -Encoding utf8
+azd env get-values > .env
 Remove-Item Env:AZURE_DEV_USER_AGENT
 ```
 

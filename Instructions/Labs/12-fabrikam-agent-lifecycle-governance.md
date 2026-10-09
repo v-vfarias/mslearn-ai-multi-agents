@@ -96,10 +96,12 @@ $resourceGroupName = ''
 $modelDeploymentName = 'gpt-5.4-mini'
 $modelName = 'gpt-5.4-mini'
 $modelVersion = '2026-03-17'
+$principalId = az ad signed-in-user show --query id -o tsv
 if ([string]::IsNullOrWhiteSpace($resourceGroupName)) {
   $resourceGroupName = "rg-lab12-$((New-Guid).Guid.Substring(0, 8))"
   az group create --name $resourceGroupName --location $azureRegion | Out-Null
 }
+az role assignment create --assignee $principalId --role "Foundry User" --resource-group $resourceGroupName
 az bicep build --file infra/main.bicep
 $env:AZURE_DEV_USER_AGENT='microsoft_foundry_skill'
 azd env new lab12-agent-lifecycle
@@ -109,7 +111,8 @@ azd env set FOUNDRY_MODEL_NAME $modelDeploymentName
 azd env set FOUNDRY_MODEL_CATALOG_NAME $modelName
 azd env set FOUNDRY_MODEL_VERSION $modelVersion
 azd provision
-az role assignment create --assignee (az ad signed-in-user show --query id -o tsv) --role "Foundry User" --resource-group $resourceGroupName
+$cosmosAccountName = ([uri](azd env get-value COSMOS_ENDPOINT)).Host.Split('.')[0]
+az cosmosdb sql role assignment create --account-name $cosmosAccountName --resource-group $resourceGroupName --scope "/" --principal-id $principalId --role-definition-id 00000000-0000-0000-0000-000000000002
 azd env get-values | Out-File .env -Encoding utf8
 Remove-Item Env:AZURE_DEV_USER_AGENT
 ```
@@ -117,8 +120,7 @@ Remove-Item Env:AZURE_DEV_USER_AGENT
 > Note: If provisioning fails, inspect the first Azure deployment error. Model or region availability, extension compatibility, quota, and role-assignment permissions are common causes. Correct the cause, then run `azd provision` again.
 
 5. After provisioning succeeds, validate that `.env` includes the Foundry project endpoint and ID, `FOUNDRY_MODEL_NAME`, `FOUNDRY_MODEL_VERSION`, the Cosmos DB endpoint and container values, and `USAGE_IDENTITY_CLIENT_ID`. The file contains resource identifiers and parameterized settings, not keys or tokens.
-6. Assign your development identity the minimum Foundry role required to manage prompt agents at project scope and the Cosmos DB Built-in Data Contributor role at the provisioned account scope.
-7. Do not add keys, connection strings, or client secrets.
+6. Do not add keys, connection strings, or client secrets.
 
 > **Network access for this lab:** The Bicep template enables native public network access for Foundry and Cosmos DB so the local application can reach both data-plane endpoints. Microsoft Entra authentication and Azure RBAC are still required. After deployment, confirm public access on both resources and confirm that the Foundry default network action is **Allow**. Production environments should use an approved selected-network or private-endpoint design.
 

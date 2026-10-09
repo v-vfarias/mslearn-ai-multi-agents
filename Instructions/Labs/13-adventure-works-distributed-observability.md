@@ -83,10 +83,12 @@ Review `src/telemetry.py`, `config/telemetry-policy.yaml`, `assets/trace-scenari
 ```powershell
 $azureRegion = 'eastus2'
 $resourceGroupName = ''
+$principalId = az ad signed-in-user show --query id -o tsv
 if ([string]::IsNullOrWhiteSpace($resourceGroupName)) {
   $resourceGroupName = "rg-lab13-$((New-Guid).Guid.Substring(0, 8))"
   az group create --name $resourceGroupName --location $azureRegion | Out-Null
 }
+az role assignment create --assignee $principalId --role "Monitoring Metrics Publisher" --resource-group $resourceGroupName
 az bicep build --file infra/main.bicep
 azd env new lab13-distributed-observability
 azd env set AZURE_LOCATION $azureRegion
@@ -102,9 +104,8 @@ The scheduled-query rule uses a typed, empty fallback and skips deployment-time 
 
 5. After provisioning succeeds, validate that `.env` includes the Application Insights connection string, `APPLICATIONINSIGHTS_RESOURCE_ID`, the Log Analytics workspace ID, identity client ID, and alert resource IDs.
 6. Confirm that it contains no token or key. The Bicep identity receives `Monitoring Metrics Publisher` for deployed execution.
-7. For local live validation, assign your signed-in development identity the same role on `APPLICATIONINSIGHTS_RESOURCE_ID`.
-8. Do not enable local-key ingestion.
-9. Confirm the action group subscription email before expecting notifications.
+7. Do not enable local-key ingestion.
+8. Confirm the action group subscription email before expecting notifications.
 
 ## Task 4: Implement the solution
 

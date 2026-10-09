@@ -95,15 +95,16 @@ Review `infra/main.bicep`, the synthetic refund request, `assets/workflow-state.
 ```powershell
 $azureRegion = 'eastus2'
 $resourceGroupName = ''
+$principalId = az ad signed-in-user show --query id --output tsv
 if ([string]::IsNullOrWhiteSpace($resourceGroupName)) {
   $resourceGroupName = "rg-lab16-$((New-Guid).Guid.Substring(0, 8))"
   az group create --name $resourceGroupName --location $azureRegion | Out-Null
 }
+az role assignment create --assignee $principalId --role "Azure Service Bus Data Owner" --resource-group $resourceGroupName
 $env:AZURE_DEV_USER_AGENT='microsoft_foundry_skill'
 azd env new aw-approval-dev
 azd env set AZURE_LOCATION $azureRegion
 azd env set AZURE_RESOURCE_GROUP $resourceGroupName
-$principalId = az ad signed-in-user show --query id --output tsv
 azd env set AZURE_PRINCIPAL_ID $principalId
 az bicep build --file infra/main.bicep
 azd provision

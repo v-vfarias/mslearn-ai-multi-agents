@@ -191,17 +191,15 @@ repo:<owner>/fabrikam-agent-cicd:environment:production
 ```powershell
 $azureRegion = 'eastus2'
 $suffix = (New-Guid).Guid.Substring(0, 8)
+$githubPrincipalId = '<enterprise-app-object-id>'
 @('dev', 'stg', 'prod') | ForEach-Object {
-  az group create --name "rg-lab09-$($_)-$suffix" --location $azureRegion | Out-Null
+  $resourceGroupName = "rg-lab09-$($_)-$suffix"
+  az group create --name $resourceGroupName --location $azureRegion | Out-Null
+  az role assignment create --assignee-object-id $githubPrincipalId --assignee-principal-type ServicePrincipal --role "Contributor" --resource-group $resourceGroupName
+  az role assignment create --assignee-object-id $githubPrincipalId --assignee-principal-type ServicePrincipal --role "Role Based Access Control Administrator" --resource-group $resourceGroupName
+  az role assignment create --assignee-object-id $githubPrincipalId --assignee-principal-type ServicePrincipal --role "Foundry User" --resource-group $resourceGroupName
 }
 ```
-
-6. An Azure administrator must assign the Enterprise application these roles on each selected resource group:
-
-- **Contributor**
-- **Role Based Access Control Administrator**
-
-These permissions allow the workflow to create environment-specific Foundry projects, model deployments, identities, RBAC assignments, and dashboard resources.
 
 ## Task 5: Configure GitHub environments
 

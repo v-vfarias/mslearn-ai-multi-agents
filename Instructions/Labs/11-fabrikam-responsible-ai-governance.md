@@ -105,6 +105,9 @@ if ([string]::IsNullOrWhiteSpace($resourceGroupName)) {
   az group create --name $resourceGroupName --location $azureRegion | Out-Null
 }
 
+az role assignment create --assignee $principalId --role "Foundry User" --resource-group $resourceGroupName
+az role assignment create --assignee $principalId --role "Monitoring Metrics Publisher" --resource-group $resourceGroupName
+az role assignment create --assignee $principalId --role "Log Analytics Reader" --resource-group $resourceGroupName
 az bicep build --file infra/main.bicep
 azd env new lab11-rai-governance
 azd env set AZURE_LOCATION $azureRegion

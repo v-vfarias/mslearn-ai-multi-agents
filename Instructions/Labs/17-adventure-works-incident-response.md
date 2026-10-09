@@ -96,15 +96,19 @@ Copy-Item .env.example .env
 ```powershell
 $azureRegion = 'eastus2'
 $resourceGroupName = ''
+$principalId = az ad signed-in-user show --query id --output tsv
 if ([string]::IsNullOrWhiteSpace($resourceGroupName)) {
   $resourceGroupName = "rg-lab17-$((New-Guid).Guid.Substring(0, 8))"
   az group create --name $resourceGroupName --location $azureRegion | Out-Null
 }
+az role assignment create --assignee $principalId --role "Azure Event Hubs Data Receiver" --resource-group $resourceGroupName
+az role assignment create --assignee $principalId --role "Storage Blob Data Contributor" --resource-group $resourceGroupName
+az role assignment create --assignee $principalId --role "Log Analytics Reader" --resource-group $resourceGroupName
+az role assignment create --assignee $principalId --role "Monitoring Metrics Publisher" --resource-group $resourceGroupName
 $env:AZURE_DEV_USER_AGENT='microsoft_foundry_skill'
 azd env new aw-incident-dev
 azd env set AZURE_LOCATION $azureRegion
 azd env set AZURE_RESOURCE_GROUP $resourceGroupName
-$principalId = az ad signed-in-user show --query id --output tsv
 azd env set AZURE_PRINCIPAL_ID $principalId
 az bicep build --file infra/main.bicep
 azd provision

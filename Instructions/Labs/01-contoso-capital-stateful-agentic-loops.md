@@ -110,10 +110,12 @@ Before continuing, confirm that you can locate the bounded reflection loop, the 
 ```powershell
 $azureRegion = 'eastus2'
 $resourceGroupName = ''
+$principalId = az ad signed-in-user show --query id -o tsv
 if ([string]::IsNullOrWhiteSpace($resourceGroupName)) {
   $resourceGroupName = "rg-lab01-$((New-Guid).Guid.Substring(0, 8))"
   az group create --name $resourceGroupName --location $azureRegion | Out-Null
 }
+az role assignment create --assignee $principalId --role "Foundry User" --resource-group $resourceGroupName
 ```
 
 **Validate and provision the infrastructure**
@@ -136,25 +138,9 @@ Remove-Item Env:AZURE_DEV_USER_AGENT
 
 3. If provisioning fails, inspect the first deployment error. For model or region availability errors, update the relevant environment value and rerun `azd provision`.
 
-4. Grant the signed-in user permission to create and use agents in the provisioned Foundry account:
-
-```powershell
-az role assignment create --assignee (az ad signed-in-user show --query id -o tsv) --role "Foundry User" --resource-group $resourceGroupName
-```
-
-The **Foundry User** role includes the agent read, write, and delete actions required by this lab. The signed-in identity must be allowed to create role assignments. In a managed lab environment, an administrator can run this command for the learner.
-
-5. Verify the role assignment:
-
-```powershell
-az role assignment list --assignee (az ad signed-in-user show --query id -o tsv) --resource-group $resourceGroupName --output table
-```
-
-If the assignment was just created, refresh the Azure CLI token with `az logout` and `az login` before running the application.
-
 **Verify the generated environment**
 
-6. Open `.env` and confirm that it contains:
+4. Open `.env` and confirm that it contains:
 
 - `FOUNDRY_PROJECT_ENDPOINT`
 - `FOUNDRY_MODEL_NAME`
@@ -166,7 +152,7 @@ The Application Insights connection string is stored in the Foundry project conn
 
 > **Network access for this lab:** The Bicep template enables the Foundry account's native public network access and sets the default network action to **Allow** so the local application can reach the project endpoint. Microsoft Entra authentication and Azure RBAC are still required. After deployment, confirm these settings on the Foundry account **Networking** page. Production environments should use an approved selected-network or private-endpoint design.
 
-7. Do not add tokens or keys to `.env`.
+5. Do not add tokens or keys to `.env`.
 
 ## Task 4: Implement the solution
 

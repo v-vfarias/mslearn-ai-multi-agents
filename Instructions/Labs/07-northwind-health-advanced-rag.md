@@ -149,10 +149,14 @@ $azureRegion = 'eastus2'
 $resourceGroupName = ''
 az login
 azd auth login
+$principalId = az ad signed-in-user show --query id -o tsv
 if ([string]::IsNullOrWhiteSpace($resourceGroupName)) {
   $resourceGroupName = "rg-lab07-$((New-Guid).Guid.Substring(0, 8))"
   az group create --name $resourceGroupName --location $azureRegion | Out-Null
 }
+az role assignment create --assignee $principalId --role "Search Service Contributor" --resource-group $resourceGroupName
+az role assignment create --assignee $principalId --role "Search Index Data Contributor" --resource-group $resourceGroupName
+az role assignment create --assignee $principalId --role "Cognitive Services OpenAI User" --resource-group $resourceGroupName
 az bicep build --file infra/main.bicep
 azd env new lab07-rag-dev
 azd env set AZURE_LOCATION $azureRegion
